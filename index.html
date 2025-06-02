@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Criador de Setlist Comunitário</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+
+        .voter-selector {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .voter-selector label {
+            font-size: 1.2em;
+            margin-right: 15px;
+            color: #555;
+        }
+
+        .voter-selector select {
+            padding: 10px 15px;
+            font-size: 1.1em;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            background: white;
+        }
+
+        .playlist {
+            margin-bottom: 30px;
+        }
+
+        .song-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .song-info {
+            flex: 1;
+        }
+
+        .song-title {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .song-votes {
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .vote-section {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .vote-section select {
+            padding: 5px 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .vote-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .vote-btn:hover {
+            background: #5a6fd8;
+        }
+
+        .add-song {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .add-song h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .input-group input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .submit-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .submit-btn:hover {
+            background: #218838;
+        }
+
+        .average-score {
+            font-weight: bold;
+            color: #667eea;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎵 Criador de Setlist Comunitário</h1>
+        
+        <div class="voter-selector">
+            <label for="voter">Quem está votando:</label>
+            <select id="voter">
+                <option value="Sarki">Sarki</option>
+                <option value="Ítalo">Ítalo</option>
+            </select>
+        </div>
+
+        <div class="playlist" id="playlist">
+            <h3>📋 Playlist Atual</h3>
+            <div id="songList"></div>
+        </div>
+
+        <div class="add-song">
+            <h3>➕ Adicionar Nova Música</h3>
+            <div class="input-group">
+                <input type="text" id="artistInput" placeholder="Nome do Artista">
+                <input type="text" id="songInput" placeholder="Nome da Música">
+            </div>
+            <center><button class="submit-btn" onclick="addSong()">Enviar</button></center>
+        </div>
+    </div>
+
+    <script>
+        // Dados iniciais
+        let songs = [
+        {
+            id: 1,
+            artist: "Queen",
+            title: "Love of My Life",
+            votes: { "Sark": 0, "Ítalo": 0 }
+        },
+        {
+            id: 2,
+            artist: "AC/DC",
+            title: "Back in Black",
+            votes: { "Sark": 0, "Ítalo": 0 }
+        },
+        {
+            id: 3,
+            artist: "AC/DC",
+            title: "Highway to Hell",
+            votes: { "Sark": 0, "Ítalo": 0 }
+        },
+        {
+            id: 4,
+            artist: "Led Zeppelin",
+            title: "Immigrant Song",
+            votes: { "Sark": 0, "Ítalo": 0 }
+        },
+        {
+            id: 5,
+            artist: "Bon Jovi",
+            title: "Livin' on a Prayer",
+            votes: { "Sark": 0, "Ítalo": 0 }
+        },
+        {
+            id: 6,
+            artist: "The Beatles",
+            title: "Come Together",
+            votes: { "Sark": 0, "Ítalo": 0 }
+        },
+        {
+            id: 7,
+            artist: "The Beatles",
+            title: "Twist and Shout",
+            votes: { "Sark": 0, "Ítalo": 0 }
+        },
+        {
+            id: 8,
+            artist: "Legião Urbana",
+            title: "Tempo Perdido",
+            votes: { "Sark": 0, "Ítalo": 0 }
+        },
+        {
+            id: 9,
+            artist: "The Beatles",
+            title: "Yesterday",
+            votes: { "Sark": 0, "Ítalo": 0 }
+        },
+        {
+            id: 10,
+            artist: "Michael Jackson",
+            title: "I'll Be There",
+            votes: { "Sark": 0, "Ítalo": 0 }
+        }
+    ];
+        let nextId = 11;
+
+        // Função para calcular média dos votos
+        function getAverageScore(song) {
+            const votes = Object.values(song.votes).filter(vote => vote > 0);
+            if (votes.length === 0) return 0;
+            return (votes.reduce((sum, vote) => sum + vote, 0) / votes.length).toFixed(1);
+        }
+
+        // Função para renderizar a lista de músicas
+        function renderSongs() {
+            // Ordenar por média de votos (decrescente)
+            const sortedSongs = [...songs].sort((a, b) => {
+                const avgA = parseFloat(getAverageScore(a));
+                const avgB = parseFloat(getAverageScore(b));
+                return avgB - avgA;
+            });
+
+            const songList = document.getElementById('songList');
+            songList.innerHTML = '';
+
+            sortedSongs.forEach(song => {
+                const songDiv = document.createElement('div');
+                songDiv.className = 'song-item';
+                
+                const avgScore = getAverageScore(song);
+                const sarkiVote = song.votes.Sarki || 0;
+                const italoVote = song.votes.Ítalo || 0;
+
+                songDiv.innerHTML = `
+                    <div class="song-info">
+                        <div class="song-title">${song.artist} - ${song.title}</div>
+                        <div class="song-votes">
+                            Sarki: ${sarkiVote}/5 | Ítalo: ${italoVote}/5
+                            <span class="average-score">Média: ${avgScore}</span>
+                        </div>
+                    </div>
+                    <div class="vote-section">
+                        <select id="vote-${song.id}">
+                            <option value="0">Nota</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                        </select>
+                        <button class="vote-btn" onclick="vote(${song.id})">Votar</button>
+                    </div>
+                `;
+                
+                songList.appendChild(songDiv);
+            });
+        }
+
+        // Função para votar
+        function vote(songId) {
+            const voter = document.getElementById('voter').value;
+            const voteValue = parseInt(document.getElementById(`vote-${songId}`).value);
+            
+            if (voteValue === 0) {
+                alert('Por favor, selecione uma nota de 1 a 5!');
+                return;
+            }
+
+            const song = songs.find(s => s.id === songId);
+            if (song) {
+                song.votes[voter] = voteValue;
+                renderSongs();
+                
+                // Reset do seletor de voto
+                document.getElementById(`vote-${songId}`).value = "0";
+                
+                alert(`${voter} votou ${voteValue} para "${song.artist} - ${song.title}"`);
+            }
+        }
+
+        // Função para adicionar nova música
+        function addSong() {
+            const artist = document.getElementById('artistInput').value.trim();
+            const title = document.getElementById('songInput').value.trim();
+            
+            if (!artist || !title) {
+                alert('Por favor, preencha tanto o artista quanto a música!');
+                return;
+            }
+
+            // Verificar se a música já existe
+            const exists = songs.some(song => 
+                song.artist.toLowerCase() === artist.toLowerCase() && 
+                song.title.toLowerCase() === title.toLowerCase()
+            );
+
+            if (exists) {
+                alert('Esta música já está na playlist!');
+                return;
+            }
+
+            const newSong = {
+                id: nextId++,
+                artist: artist,
+                title: title,
+                votes: { "Sarki": 0, "Ítalo": 0 }
+            };
+
+            songs.push(newSong);
+            renderSongs();
+
+            // Limpar campos
+            document.getElementById('artistInput').value = '';
+            document.getElementById('songInput').value = '';
+
+            alert(`"${artist} - ${title}" foi adicionada à playlist!`);
+        }
+
+        // Event listeners
+        document.getElementById('artistInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('songInput').focus();
+            }
+        });
+
+        document.getElementById('songInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addSong();
+            }
+        });
+
+        // Renderizar lista inicial
+        renderSongs();
+    </script>
+</body>
+</html>
